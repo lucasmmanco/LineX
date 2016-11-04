@@ -55,18 +55,18 @@ void pwm_setPWMDutyCycle(int iDuty){
 }
 
 /* ************************************************ */
-/* Method name:        timer_coolerfan_init         */
-/* Method description: Initialize the cooler device */
+/* Method name:        pwm_module/-init		        */
+/* Method description: Initialize the pwm motor 	*/
 /* Input params:       n/a                          */
 /* Output params:      n/a                          */
 /* ************************************************ */
-void pwm_coolerfan_init(void)
+void pwm_module_init(void)
 {
     /* un-gate port clock*/
     SIM_SCGC5 |= SIM_SCGC5_PORTA(CGC_CLOCK_ENABLED);
 
-    /* set pin as PWM */
-    PORTA_PCR13 |= PORT_PCR_MUX(3U);
-
+    /* set pins as PWM */
+    PORTA_PCR4 |= PORT_PCR_MUX(1U);	// ALT1
+	PORTA_PCR5 |= PORT_PCR_MUX(1U); // ALT1
 
 }
