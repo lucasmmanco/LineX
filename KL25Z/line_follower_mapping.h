@@ -29,29 +29,30 @@
 #define LS_PORT_BASE_PNT            PORTE                                   /* peripheral port base pointer */
 #define LS_GPIO_BASE_PNT            PTE
 
-#define LS1_PIN                     20U                                      /* led #1 pin */
+#define LS1_PIN                     20U                                      /* led #0 pin */
 #define LS1_DIR_OUTPUT              (GPIO_OUTPUT << LS1_PIN)
 #define LS1_ALT                     0x01u
 
-#define LS2_PIN                     21U                                      /* led #2 pin */
+#define LS2_PIN                     21U                                      /* led #1 pin */
 #define LS2_DIR_OUTPUT              (GPIO_OUTPUT << LS2_PIN)
 #define LS2_ALT                     0x01u
 
-#define LS3_PIN                     22U                                      /* led #3 pin */
+#define LS3_PIN                     22U                                      /* led #2 pin */
 #define LS3_DIR_OUTPUT              (GPIO_OUTPUT << LS3_PIN)
 #define LS3_ALT                     0x01u
 
-#define LS4_PIN                     23U                                      /* led #4 pin */
+#define LS4_PIN                     23U                                      /* led #3 pin */
 #define LS4_DIR_OUTPUT              (GPIO_OUTPUT << LS4_PIN)
 #define LS4_ALT                     0x01u
 
-#define LS5_PIN                     29U                                      /* led #5 pin */
+#define LS5_PIN                     29U                                      /* led #4 pin */
 #define LS5_DIR_OUTPUT              (GPIO_OUTPUT << LS5_PIN)
 #define LS5_ALT                     0x01u
 
-#define LS6_PIN                     30U                                      /* led #6 pin */
+#define LS6_PIN                     30U                                      /* led #5 pin */
 #define LS6_DIR_OUTPUT              (GPIO_OUTPUT << LS6_PIN)
 #define LS6_ALT                     0x01u
+
 
 /*                IR TX Definitions                         */
 #define IR_TX_PORT_BASE_PNT         PORTE
@@ -60,5 +61,14 @@
 #define IR_TX_PIN                   5U
 #define IR_TX_DIR_OUTPUT            (GPIO_OUTPUT << IR_TX_PIN)
 #define IR_TX_ALT                   0x01u
+
+
+/*                Encoder Definitions                       */
+#define ENCODER_PORT_BASE_PNT       PORTC //12 E 13
+
+#define ENCODER_R_ALT               0x04u
+#define ENCODER_L_ALT               0x04u
+
+
 
 #endif

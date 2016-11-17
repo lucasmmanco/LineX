@@ -3,9 +3,9 @@
 /* File description: Header File constaing the methods to initialize */
 /*					 and read the encoder of the peripheral board    */
 /*                                                                   */
-/* Author name:      Henrique Amitay & Lucas Manco                   */
-/* Creation date:    20may2016                                       */
-/* Revision date:    03jun2016                                       */
+/* Author name:      Lucas Manco                                     */
+/* Creation date:    02nov2016                                       */
+/* Revision date:    03nov2016                                       */
 /* ***************************************************************** */
 
 #ifndef SOURCES_ENCODER_H_
@@ -25,16 +25,17 @@ void encoder_initEncoderConfig();
 /* ************************************************ */
 /* Method name:        getTPMCNT        	        */
 /* Method description: Returns the TPM0_CNT value   */
-/*					                                */
-/* Input params:       n/a                          */
-/* Output params:      n/a                          */
+/*					   or TPM1_CNT                  */
+/* Input params:       enc_index = 0 for rigth enc  */
+/*                                 1 for left enc   */
+/* Output params:      iCount = count value         */
 /* ************************************************ */
-int encoder_getTPMCNT();
+int encoder_getTPMCNT(int enc_index);
 
 /* ************************************************ */
 /* Method name:        resetTPMCNT      	        */
 /* Method description: Resets manually the TPM0_CNT */
-/*                     register                     */
+/*                     and TPM1_CNT registers       */
 /*					                                */
 /* Input params:       n/a                          */
 /* Output params:      n/a                          */

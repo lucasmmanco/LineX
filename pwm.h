@@ -12,7 +12,7 @@
 /* Input params:	   n/a 							  */
 /* Outpu params:	   n/a 							  */
 /* ************************************************** */
-void pwm_initTPM1AsPWM(void);
+void pwm_initTPM0AsPWM(void);
 
 /* ************************************************ */
 /* Method name:        pwm_coolerfan_init         */
@@ -20,7 +20,7 @@ void pwm_initTPM1AsPWM(void);
 /* Input params:       n/a                          */
 /* Output params:      n/a                          */
 /* ************************************************ */
-void pwm_coolerfan_init(void);
+void pwm_setPWMDutyCycle(int iDuty, int iCH);
 
 /* ************************************************ */
 /* Method name:        pwm_coolerfan_init         */
@@ -29,4 +29,4 @@ void pwm_coolerfan_init(void);
 /*                     0 to 100                     */
 /* Output params:      n/a                          */
 /* ************************************************ */
-void pwm_setPWMDutyCycle(int iDuty);
+void pwm_module_init(void);

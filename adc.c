@@ -22,7 +22,8 @@ void adc_initADCModule(void){
 	SIM_SCGC6 |= SIM_SCGC6_ADC0(CGC_CLOCK_ENABLED);	//Enable clock for ADC
 
     /* un-gate port clock*/
-    SIM_SCGC5 |= SIM_SCGC5_PORTE(CGC_CLOCK_ENABLED);
+    SIM_SCGC5 |= SIM_SCGC5_PORTB(CGC_CLOCK_ENABLED);
+    SIM_SCGC5 |= SIM_SCGC5_PORTC(CGC_CLOCK_ENABLED);
 
     /* set pin as ADC In */
     PORTB_PCR0 |= PORT_PCR_MUX(0u);   //IR1
@@ -37,7 +38,7 @@ void adc_initADCModule(void){
     ADC0_SC2 |= (ADC_SC2_REFSEL(0b00) | ADC_SC2_DMAEN(0b0) | ADC_SC2_ACFE(0b0) | ADC_SC2_ADTRG(0b0));
     
     ADC0_CFG2 |= (ADC_CFG2_ADLSTS(0b00) | ADC_CFG2_ADHSC(0b0) | ADC_CFG2_ADACKEN(0b0) | ADC_CFG2_MUXSEL(0b0));
-    
+
 }
 
 /* ************************************************** */
@@ -47,25 +48,28 @@ void adc_initADCModule(void){
 /* Outpu params:	   n/a 							  */
 /* ************************************************** */
 void adc_initConvertion(char sensorIndex){
-
+    
+    ADC0_SC1A = ADC_SC1_AIEN(0);
+    ADC0_SC1A = ADC_SC1_DIFF(0);
+    
 	switch(sensorIndex){
 		case 0:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01000) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01000);
 			break;
 		case 1:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01001) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01001);
 			break;
 		case 2:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01100) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01100);
 			break;
 		case 3:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01101) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01101);
 			break;
 		case 4:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01011) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01011);
 			break;
 		case 5:
-			ADC0_SC1A &= (ADC_SC1_ADCH(0b01111) | ADC_SC1_DIFF(0b0) | ADC_SC1_AIEN(0b0));
+			ADC0_SC1A = ADC_SC1_ADCH(0b01111);
 			break;
 		default:
 			break;

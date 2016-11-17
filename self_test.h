@@ -18,27 +18,19 @@
 /* Method description: Test the functionalaty of RX IR observing the variantion */
 /*                    of the signal of each RX IR when the TX IR is up and down */
 /* Input params:      n/a                                                       */
-/* Output params:     1 if it's everything OK or the number of the error        */
+/* Output params:     0 if it's everything OK or the number of the error        */
 /* **************************************************************************** */
-int selfTest_IR(void){}
+int selfTest_IR(void);
 
 /* **************************************************************************** */
-/* Method name:        selfTest_motor                                           */
-/* Method description: Test the functionalaty of motor observing the variantion */
-/*                    of the speed when PWM Duty Cicle is 100% and 0%           */
+/* Method name:        selfTest_motor_and_encoder                               */
+/* Method description: Test the functionalaty of motor and encoder observing    */
+/*                     the variantion of the speed when PWM Duty Cicle is 100%  */
+/*                     and 0%                                                   */
 /* Input params:      n/a                                                       */
-/* Output params:     1 if it's everything OK or the number of the error        */
+/* Output params:     0 if it's everything OK or the number of the error        */
 /* **************************************************************************** */
-int selfTest_motor(void){}
-
-/* **************************************************************************** */
-/* Method name:        selfTest_IR                                              */
-/* Method description: Test the functionalaty of encoder checking the variantion*/
-/*                    of the signal when PWM Duty Cicle is 100% and 0%          */
-/* Input params:      n/a                                                       */
-/* Output params:     1 if it's everything OK or the number of the error        */
-/* **************************************************************************** */
-int selfTest_encoder(void){}
+int selfTest_motor_and_encoder(void);
 
 
 #endif /* SOURCES_SELF_TEST_H_ */
