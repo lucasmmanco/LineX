@@ -10,18 +10,19 @@
 #include "motor_hal.h"
 #include "encoder.h"
 #include "self_test.h"
+#include "pid.h"
 
 /* system includes */
 #include "fsl_debug_console.h"
 
 /* defines */
-#define CYCLIC_EXECUTIVE_PERIOD         50*10000 /* 10000 100 micro seconds */
+#define CYCLIC_EXECUTIVE_PERIOD         1000*1000 /* 10000 100 micro seconds */
 
 volatile unsigned int uiFlagNextPeriod = 0;         /* cyclic executive flag */
 
-float fRpsR = 0.0;
-float fRpsL = 0.0;
-float iCycleTime = 0.5; //(CYCLIC_EXECUTIVE_PERIOD/1000000);
+int iEncR = 0;
+int iEncL = 0;
+float iCycleTime = 1; //(CYCLIC_EXECUTIVE_PERIOD/1000000);
 
 void main_boardInit(void){
     ////Clock
@@ -52,10 +53,8 @@ void main_cyclicExecuteIsr(void){
 
     /* set the cyclic executive flag */
     uiFlagNextPeriod = 1;
-    fRpsR = encoder_getTPMCNT(0);
-    fRpsL = encoder_getTPMCNT(1);
-
-    encoder_resetTPMCNT();
+    iEncR = encoder_getTPMCNT(0);
+    iEncL = encoder_getTPMCNT(1);
 }
 
 int main(void){
@@ -66,9 +65,16 @@ int main(void){
 
     int position = 0;
     
-    float rpsR, rpsL;
-    int rpmR, rpmL;
-
+    float fRpsR, fRpsL;
+    PID_MOTOR pidR, pidL;
+    
+    int iPwmRefR[2] = {0, 97}; //pwm[0] = min pwm e pwm[1] = max pwm
+    int iPwmRefL[2] = {0, 97};
+    float fVelRefR[2] = {0.0, 0.0}; //vel[0] = min vel e vel[1] = max vel
+    float fVelRefL[2] = {0.0, 0.0};
+    int iPwmR = 0;
+    int iPwmL = 0;
+    
     int stt = 0;
     int iTimer = 0;
     int ir_rx_index = 0;
@@ -77,36 +83,50 @@ int main(void){
     
     //int error = selfTest_IR();
     //error = selfTest_motor_and_encoder();
-    //
-    //for(iTimer=0; iTimer < 100; iTimer++)
+
+    //for(iTimer=0; iTimer < 40; iTimer++)
     //    util_genDelay10ms();
-    //
+
     led_setAllLeds();
-    ir_setIRTX();
-    ir_sensor_runCalibration(&ir_Base);
+    //ir_setIRTX();
+    //ir_sensor_runCalibration(&ir_Base);
+
+    selfTest_motorCalibration(fVelRefR, fVelRefL, iPwmRefR, iPwmRefL);
+        
+    pid_motorInitializate(&pidR, fVelRefR, iPwmRefR);
+    pid_motorInitializate(&pidL, fVelRefL, iPwmRefL);
     
-    //motor_stop();
+    pidR.kp = 0.2180;   //0.3645;       //0.2180;     //0.2645;
+    pidR.ki = 0.2595;   //0.5455;       //0.2560;     //0.521;
+    pidR.kd = 0.0041;   //0.0045;       //0.0041;     //0.0045;
     
-    led_blinkAllLeds(250, 5);
+    pidL.kp = 0.2205;   //0.2545;
+    pidL.ki = 0.2605;   //0.3105;
+    pidL.kd = 0.0045;   //0.0045;
+    
+    led_blinkAllLeds(200, 5);
 
     while(1U){
 
         //led_clearAllLeds();
-        ir_setIRTX();
-        //
-        //rpsR = fRpsR/iCycleTime;
-        //rpsL = fRpsL/iCycleTime;
-        //
-        //motor_set('R', 1, 70);
-        //motor_set('L', 0, 50);
-
-        //rpmR = encoder_getTPMCNT(0);
-        //rpmL = encoder_getTPMCNT(1);
-        //encoder_resetTPMCNT();
+        //ir_setIRTX();
         
+        pidR.ref = 1.9;
+        pidL.ref = 1.9;
+        
+        fRpsR = ((float)(iEncR)/(20.0*iCycleTime));
+        fRpsL = ((float)(iEncL)/(20.0*iCycleTime));
+        
+        iPwmR = pid_motorUpdate(&pidR, fRpsR);
+        iPwmL = pid_motorUpdate(&pidL, fRpsL);
+        
+        motor_set('R', 1, iPwmR);
+        motor_set('L', 1, iPwmL);
+
+      
         //ir_sensor_runCalibration(IR_VectorValue);
         //ir_sensor_readNormal(&ir_Base, &ir_normalized);
-        position = ir_sensor_returnLow(ir_Base);
+        //position = ir_sensor_returnLow(ir_Base);
         //position = ir_sensor_returnPosiTest(ir_rx_val);
         
         

@@ -16,7 +16,7 @@
 #include <util.h>
 
 #define IR_BASE_VARIATION   1500
-#define ENC_BASE_VARIATION  1
+#define ENC_BASE_VARIATION  5
 
 //void main_cyclicExecuteIsr(void){
 //
@@ -62,8 +62,6 @@ int selfTest_motor_and_encoder(){
     int iEnc0 = 0;
     int iEnc1 = 0;
     
-    //tc_installLptmr0(CYCLIC_EXECUTIVE_PERIOD, main_cyclicExecuteIsr);
-    
     //Blinks all Leds to indicates that this self test will start
     //encoder_resetTPMCNT();
     led_blinkAllLeds(100, 10);
@@ -72,18 +70,14 @@ int selfTest_motor_and_encoder(){
     motor_set('R', 1, 100);
     motor_set('L', 1, 100);
     
-    //while(!uiFlagNextPeriod);
-    //    uiFlagNextPeriod = 0;
-    
     //This loop is necessary because of the motor hysteresis
-    for(iTime=0; iTime<100; iTime++){
-        util_genDelay10ms();
-    }
+    //for(iTime=0; iTime<1000000; iTime++){}
 
+    for(int delay = 0; delay<50; delay++)
+        util_genDelay10ms();
+    
     iEnc0 = encoder_getTPMCNT(0);
     iEnc1 = encoder_getTPMCNT(1);
-    //iEnc0 = encoder_getTPMCNT(0) - iEnc0;
-    //iEnc1 = encoder_getTPMCNT(1) - iEnc1;
     
     motor_stop();
     
@@ -100,4 +94,90 @@ int selfTest_motor_and_encoder(){
     encoder_resetTPMCNT();
     
     return error;
+}
+
+void selfTest_motorCalibration(float fVelR[], float fVelL[], int iPwmR[], int iPwmL[]){
+    
+    int error = 0;
+    int iTime = 0;
+    int iEnc0 = 0;
+    int iEnc1 = 0;
+    int iMinPwm = 36;
+    
+    //Blinks alli Leds to indicates that this self test will start
+    //encoder_resetTPMCNT();
+    led_blinkAllLeds(100, 10);
+    led_clearAllLeds();
+    
+    /**************Get the min PWM and Speed values************/
+    //Right motor
+    while((iEnc0 < 2) || iMinPwm >= 100){
+        motor_set('R', 1, iMinPwm);
+        //This loop is necessary cause of the motor hysteresis
+        for(iTime=0; iTime<20; iTime++)
+            util_genDelay10ms();
+        iEnc0 = encoder_getTPMCNT(0);
+        iMinPwm = iMinPwm + 2;
+    }
+    
+    motor_stop();
+    iPwmR[0] = iMinPwm - 2;
+    fVelR[0] = (float)iEnc0/(20.0*0.2);
+    iMinPwm = 36;
+    
+    //wait 400ms
+    for(iTime=0; iTime<20; iTime++)
+        util_genDelay10ms();
+    
+    //Left motor
+    while((iEnc1 < 2) || iMinPwm >= 100){
+        motor_set('L', 1, iMinPwm);
+        //This loop is necessary cause of the motor hysteresis
+        for(iTime=0; iTime<20; iTime++)
+            util_genDelay10ms();
+        iEnc1 = encoder_getTPMCNT(1);
+        iMinPwm = iMinPwm + 2;
+    }
+    
+    motor_stop();
+    iPwmL[0] = iMinPwm - 2;
+    fVelL[0] = (float)iEnc1/(20.0*0.2);
+    
+    //wait 400ms
+    for(iTime=0; iTime<20; iTime++)
+        util_genDelay10ms();
+    
+    encoder_resetTPMCNT();
+    iEnc0 = 0;
+    iEnc1 = 0;
+    
+    /**************Get the max PWM and Speed values************/
+    
+    iPwmR[1] = 100;
+    iPwmL[1] = 100;
+    
+    //Right motor
+    motor_set('R', 1, iPwmR[1]);
+    //This loop is necessary cause of the motor hysteresis
+    for(iTime=0; iTime<20; iTime++)
+        util_genDelay10ms();
+    motor_stop();
+    iEnc0 = encoder_getTPMCNT(0);
+    fVelR[1] = (float)iEnc0/(20.0*0.2);
+    
+    for(iTime=0; iTime<40; iTime++)
+        util_genDelay10ms();
+    
+    //Left motor
+    motor_set('L', 1, iPwmL[1]);
+    //This loop is necessary cause of the motor hysteresis
+    for(iTime=0; iTime<20; iTime++)
+        util_genDelay10ms();
+    motor_stop();
+    iEnc1 = encoder_getTPMCNT(1);
+    fVelL[1] = (float)iEnc1/(20.0*0.2);
+    
+    //fVelL[1] = 75.0;
+    //fVelR[1] = 80.0;
+
 }

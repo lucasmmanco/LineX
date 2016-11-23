@@ -236,65 +236,54 @@ void ir_sensor_doAbarrelRom(int* in_Array, float out_Spline[]){
 /****************************************/
 int ir_sensor_intensityCheck(int* in_Array, int* out_Deduc){
 	
-	int iHighpoint = 0, i=0;
+	int iHighpoint = 0;
+    int i=0;
+    int iMax = 0;
 
 	while(i<6){
-		
 		/* Vetor de maiores valores	*/
 		if(iHighpoint < in_Array[i]){
-			
 			iHighpoint = in_Array[i];	// Atualiza maior valor
-			out_Deduc[0] = i;	// Salva o sensor referência
+			iMax = i;	// Salva o sensor referência
 		}
 		i++;	
 	}
 	
-	i = out_Deduc[0];	// Retorna valor do sensor referência
-
-	if(0 == i || 0 == (i-1)){	
-		/* Margem Esquerda */
-		out_Deduc[0] = in_Array[0];
-		out_Deduc[1] = in_Array[0];
-		out_Deduc[2] = in_Array[1];
-		out_Deduc[3] = in_Array[2];
-        
-        if(0 == (i-1))
-            i--;    //Correção para posterior Tratamento
-	}
-	else if(5 == i || 5 == (i+1)){
-		/* Margem Direita */
-		out_Deduc[0] = in_Array[3];
-		out_Deduc[1] = in_Array[4];
-		out_Deduc[2] = in_Array[5];
-		out_Deduc[3] = in_Array[5];
-	}
-	else{
-	/*	Sinal posterior maior que anterior	*/
-		if(in_Array[i-1] < in_Array[i+1]){
-		
-			out_Deduc[0] = in_Array[i-1];
-			out_Deduc[1] = in_Array[i];
-			out_Deduc[2] = in_Array[i+1];
-			out_Deduc[3] = in_Array[i+2];
-		}
-	/*	Sinal posterior menor que anterior	*/
-		if(in_Array[i-1] <= in_Array[i+1]){
-			out_Deduc[0] = in_Array[i-2];
-			out_Deduc[1] = in_Array[i-1];
-			out_Deduc[2] = in_Array[i];
-			out_Deduc[3] = in_Array[i+1];
-            i--;    // Correção para posterior tratamento
-		}
-	}
-
-    //out_Deduc[0] = 17;//in_Array[i-2];
-    //out_Deduc[1] = 45;//in_Array[i-1];
-    //out_Deduc[2] = 55;//in_Array[i];
-    //out_Deduc[3] = 14;//in_Array[i+1];
-    //
-    //i = 1;
+    switch(iMax){
+        case 0:
+            out_Deduc[0] = in_Array[0];
+            out_Deduc[1] = in_Array[0];
+            out_Deduc[2] = in_Array[1];
+            out_Deduc[3] = in_Array[2];
+            break;
+        case 1:
+            out_Deduc[0] = in_Array[0];
+            out_Deduc[1] = in_Array[0];
+            out_Deduc[2] = in_Array[1];
+            out_Deduc[3] = in_Array[2];
+            if(in_Array[iMax-1] > in_Array[iMax+1]){
+                iMax--;
+            }
+            break;
+        case 5:
+            out_Deduc[0] = in_Array[3];
+            out_Deduc[1] = in_Array[4];
+            out_Deduc[2] = in_Array[5];
+            out_Deduc[3] = in_Array[5];
+            break;
+        default:
+            out_Deduc[0] = in_Array[iMax-2];
+            out_Deduc[1] = in_Array[iMax-1];
+            out_Deduc[2] = in_Array[iMax];
+            out_Deduc[3] = in_Array[iMax+1];
+            /*	Sinal posterior menor que anterior	*/
+            if(in_Array[iMax-1] > in_Array[iMax+1]){
+                iMax--;
+            }
+            break;
+    }
     
-	return i;
+	return iMax;
 }
 
 /* Returns normalized location between 0 - 100 %	*/
@@ -304,11 +293,11 @@ int ir_sensor_returnLow(int *IR_Reference){
     
     float Equation[4];
 
-	ir_sensor_readNormal(IR_Reference,&Vector);
+	ir_sensor_readNormal(IR_Reference, &Vector);
 
-	Position = ir_sensor_intensityCheck(&Vector, &Gaussian);
+	Position = ir_sensor_intensityCheck(Vector, Gaussian);
 
-	ir_sensor_doAbarrelRom(&Gaussian, &Equation);
+	ir_sensor_doAbarrelRom(Gaussian, Equation);
 
 	float a, b, c;
 	float Result1, Result2;
@@ -322,16 +311,20 @@ int ir_sensor_returnLow(int *IR_Reference){
 	Result2 = (-b - sqrt((b*b)-4*a*c))/(2*a);
 	
 	if(Result1 > 0 && Result1 < 1){
-		
 		Result1 = Result1;
 	}
 	else if(Result2 > 0 && Result2 < 1){
-
 		Result1 = Result2;
 	}
-    else
-        Result1 = 0;
+    else if(Result2 > Result1){ 
+        Result1 = Result2;
+    }
 
+    //CHecar essas condicoes para Position=0 e Position=5!!!
+    if(Result1 > 1 && (Position==5 || Position==0)){
+        Result1 = Result1 - 1.0;   
+    }
+    
 	Result1 = (15*Position + 15*Result1)*100/75;
 	
 	return Result1;

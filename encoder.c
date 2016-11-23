@@ -69,11 +69,11 @@ int encoder_getTPMCNT(int enc_index){
 	
 	if(enc_index == 1){
 		value = TPM2_CNT;
-		//TPM2_CNT = 0;
+		TPM2_CNT = 0;
 	}
 	else{
 		value =  TPM1_CNT;
-		//TPM1_CNT = 0;
+		TPM1_CNT = 0;
 	}
 	
 	return value;

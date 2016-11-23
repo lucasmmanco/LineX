@@ -32,5 +32,17 @@ int selfTest_IR(void);
 /* **************************************************************************** */
 int selfTest_motor_and_encoder(void);
 
+/* **************************************************************************** */
+/* Method name:        selfTest_motorCalibration                                */
+/* Method description: Gets the min and max pwm of each motor and them          */
+/*                     respectives rotation (min and max).                      */
+/* Input params:      fVelMinR[] = max and min rotation (rps) of right motor    */
+/*                    fVelMinL[] = max and min rotation (rps) of left motor     */
+/*                    iPwmR[] = max and pwm of right motor                      */
+/*                    iPwmL[] = max and pwm of left motor                       */
+/* Output params:     n/a                                                       */
+/* **************************************************************************** */
+void selfTest_motorCalibration(float fVelR[], float fVelL[], int iPwmR[], int iPwmL[]);
+
 
 #endif /* SOURCES_SELF_TEST_H_ */
