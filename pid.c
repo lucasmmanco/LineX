@@ -88,17 +88,17 @@ int pid_motorUpdate(PID_MOTOR *pid_data, float sensorVal){
 void pid_splineInitializate(PID_SPLINE *pid_data, float vel[]){   
     float vel_window = (vel[1] - vel[0])/2;
     
-    pid_data->kp = 1.0; //DEFAULT
-    pid_data->ki = 1.0; //DEFAULT
-    pid_data->kd = 1.0; //DEFAULT
-    pid_data->spline_previous= 50.0;
+    pid_data->kp = 0.0; //DEFAULT
+    pid_data->ki = 0.0; //DEFAULT
+    pid_data->kd = 0.0; //DEFAULT
+    pid_data->spline_previous= 0.0;
     pid_data->error = 0.0;
-    pid_data->ref = 50.0;
+    pid_data->ref = 37.5;
     pid_data->velMin = vel[0];
     pid_data->velMax = vel[1];
     
-    pid_data->a = -vel_window/50;
-    pid_data->b = vel_window;
+    pid_data->a = -vel_window/37.5;
+    pid_data->b = 0.0;
 
 }
 
@@ -111,20 +111,25 @@ void pid_splineInitializate(PID_SPLINE *pid_data, float vel[]){
 /*                     *velL = left motor speed     */
 /* Output params:      double                       */
 /* ************************************************ */
-void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float *velL){
+void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float *velL, float velMean){
     float fP_term, fI_term, fD_term;
     float error, dif;
     float fNewSpline = 0.0;
     float fVelIncrement= 0.0;
     float fNewVelR, fNewVelL;
+    float window = 12.5;
+    
+    //if(splineVal > (pid_data->ref - window) || splineVal < (pid_data->ref + window)){
+    //    pid_data->error = 0;
+    //}
     //Proportional Gain
-    error = pid_data->ref - splineVal;
+    error =  splineVal - pid_data->ref;
     fP_term = pid_data->kp * error;
     
     //Integrative Gain
     pid_data->error += error;    
     fI_term = pid_data->ki * pid_data->error;
-
+    
     //Derivative Gain
     dif = pid_data->spline_previous - splineVal;
     pid_data->spline_previous = splineVal;
@@ -132,10 +137,19 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
     
     fNewSpline = (fP_term + fI_term + fD_term);
     
+    fNewSpline = (splineVal - pid_data->ref) * pid_data->kp;
+    
     fVelIncrement = pid_data->a * fNewSpline + pid_data->b;
     
-    fNewVelR = *velR - fVelIncrement;
-    fNewVelL = *velL + fVelIncrement;
+    if(fVelIncrement > (velMean - pid_data->velMin) || fVelIncrement > (pid_data->velMax - velMean)){
+        fVelIncrement = (velMean - pid_data->velMin);
+    }
+    
+    fNewVelR = velMean - fVelIncrement;
+    fNewVelL = velMean + fVelIncrement;
+
+    float vr = *velR;
+    float vl = *velL;
      
     if(fNewVelR < pid_data->velMin)
         fNewVelR = pid_data->velMin;
@@ -147,4 +161,8 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
     else if(fNewVelL > pid_data->velMax)
         fNewVelL = pid_data->velMax;
 
+
+    *velR = fNewVelR;
+    *velL = fNewVelL;
+        
 }
