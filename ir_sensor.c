@@ -248,40 +248,42 @@ int ir_sensor_intensityCheck(int* in_Array, int* out_Deduc){
 		}
 		i++;	
 	}
-	
-    switch(iMax){
-        case 0:
-            out_Deduc[0] = in_Array[0];
-            out_Deduc[1] = in_Array[0];
-            out_Deduc[2] = in_Array[1];
-            out_Deduc[3] = in_Array[2];
-            break;
-        case 1:
-            out_Deduc[0] = in_Array[0];
-            out_Deduc[1] = in_Array[0];
-            out_Deduc[2] = in_Array[1];
-            out_Deduc[3] = in_Array[2];
-            if(in_Array[iMax-1] > in_Array[iMax+1]){
-                iMax--;
-            }
-            break;
-        case 5:
-            out_Deduc[0] = in_Array[3];
-            out_Deduc[1] = in_Array[4];
-            out_Deduc[2] = in_Array[5];
-            out_Deduc[3] = in_Array[5];
-            break;
-        default:
-            out_Deduc[0] = in_Array[iMax-2];
-            out_Deduc[1] = in_Array[iMax-1];
-            out_Deduc[2] = in_Array[iMax];
-            out_Deduc[3] = in_Array[iMax+1];
-            /*	Sinal posterior menor que anterior	*/
-            if(in_Array[iMax-1] > in_Array[iMax+1]){
-                iMax--;
-            }
-            break;
-    }
+    
+    if(iMax == 0 || iMax == 1){	
+		/* Margem Esquerda */
+		out_Deduc[0] = in_Array[0];
+		out_Deduc[1] = in_Array[0];
+		out_Deduc[2] = in_Array[1];
+		out_Deduc[3] = in_Array[2];
+        
+        if(iMax == 1 & in_Array[0] > in_Array[2])
+            iMax--;    //Correção para posterior Tratamento
+	}
+	else if(iMax == 5 || iMax == 4){
+		/* Margem Direita */
+		out_Deduc[0] = in_Array[3];
+		out_Deduc[1] = in_Array[4];
+		out_Deduc[2] = in_Array[5];
+		out_Deduc[3] = in_Array[5];
+	}
+	else{
+	/*	Sinal posterior maior que anterior	*/
+		if(in_Array[iMax-1] < in_Array[iMax+1]){
+		
+			out_Deduc[0] = in_Array[iMax-1];
+			out_Deduc[1] = in_Array[iMax];
+			out_Deduc[2] = in_Array[iMax+1];
+			out_Deduc[3] = in_Array[iMax+2];
+		}
+	/*	Sinal posterior menor que anterior	*/
+		if(in_Array[iMax-1] >= in_Array[iMax+1]){
+			out_Deduc[0] = in_Array[iMax-2];
+			out_Deduc[1] = in_Array[iMax-1];
+			out_Deduc[2] = in_Array[iMax];
+			out_Deduc[3] = in_Array[iMax+1];
+            iMax--;    // Correção para posterior tratamento
+		}
+	}
     
 	return iMax;
 }
@@ -319,13 +321,15 @@ int ir_sensor_returnLow(int *IR_Reference){
     else if(Result2 > Result1){ 
         Result1 = Result2;
     }
+    //if(Result1 > 1 )
+    //    Result1 = Result1 - 1.0;
 
     //CHecar essas condicoes para Position=0 e Position=5!!!
     if(Result1 > 1 && (Position==5 || Position==0)){
-        Result1 = Result1 - 1.0;   
+        Result1 = Result1 - 1.0;
     }
     
-	Result1 = (15*Position + 15*Result1)*100/75;
+	Result1 = (15*Position + 15*Result1);//*100/75;
 	
 	return Result1;
 
