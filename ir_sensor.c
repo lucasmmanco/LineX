@@ -146,7 +146,7 @@ void ir_sensor_runCalibration(int* IR_VectorValue){
     motor_set('R', 1, 60);
     motor_set('L', 0, 60);
     
-    while(iTimer < 50){
+    while(iTimer < 40){
         ir_sensor_calibrateArray(IR_VectorValue);
         util_genDelay10ms();
         iTimer++;
@@ -156,7 +156,7 @@ void ir_sensor_runCalibration(int* IR_VectorValue){
     motor_set('R', 0, 60);
     motor_set('L', 1, 60);
     
-    while(iTimer < 100){
+    while(iTimer < 79){
         ir_sensor_calibrateArray(IR_VectorValue);
         util_genDelay10ms();
         iTimer++;
@@ -166,7 +166,7 @@ void ir_sensor_runCalibration(int* IR_VectorValue){
     motor_set('R', 1, 60);
     motor_set('L', 0, 60);
     
-    while(iTimer < 49){
+    while(iTimer < 35){
         ir_sensor_calibrateArray(IR_VectorValue);
         util_genDelay10ms();
         iTimer++;

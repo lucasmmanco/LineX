@@ -7,6 +7,7 @@
 /* ***************************************************************** */
     
 #include "pid.h"
+#include <math.h>
 
 
 /* *************************************************** */
@@ -93,7 +94,7 @@ void pid_splineInitializate(PID_SPLINE *pid_data, float vel[]){
     pid_data->kd = 0.0; //DEFAULT
     pid_data->spline_previous= 0.0;
     pid_data->error = 0.0;
-    pid_data->ref = 37.5;
+    pid_data->ref = 0.0;
     pid_data->velMin = vel[0];
     pid_data->velMax = vel[1];
     
@@ -117,11 +118,14 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
     float fNewSpline = 0.0;
     float fVelIncrement= 0.0;
     float fNewVelR, fNewVelL;
-    float window = 12.5;
+    float window = 5;
     
-    //if(splineVal > (pid_data->ref - window) || splineVal < (pid_data->ref + window)){
-    //    pid_data->error = 0;
-    //}
+    splineVal = splineVal - 37.5;
+    
+    if(splineVal > (pid_data->ref - window) || splineVal < (pid_data->ref + window)){
+        pid_data->error = 0;    
+    }
+        
     //Proportional Gain
     error =  splineVal - pid_data->ref;
     fP_term = pid_data->kp * error;
@@ -137,16 +141,29 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
     
     fNewSpline = (fP_term + fI_term + fD_term);
     
-    fNewSpline = (splineVal - pid_data->ref) * pid_data->kp;
+    //if(fNewSpline > 37.5)
+    //    fNewSpline = 37.5;
+    //else if(fNewSpline < -37.5)
+    //    fNewSpline = -37.5;
+    //    
     
-    fVelIncrement = pid_data->a * fNewSpline + pid_data->b;
+    if(fNewSpline < 0)
+        fVelIncrement = -(fNewSpline)/40.0;
+    else
+        fVelIncrement = fNewSpline/40.0;
     
-    if(fVelIncrement > (velMean - pid_data->velMin) || fVelIncrement > (pid_data->velMax - velMean)){
-        fVelIncrement = (velMean - pid_data->velMin);
+    //if(fVelIncrement > (velMean - pid_data->velMin) || fVelIncrement > (pid_data->velMax - velMean)){
+    //    fVelIncrement = (velMean - pid_data->velMin);
+    //}
+    
+    if(splineVal < pid_data->ref){
+        fNewVelR = velMean - fVelIncrement;
+        fNewVelL = velMean + fVelIncrement;
     }
-    
-    fNewVelR = velMean - fVelIncrement;
-    fNewVelL = velMean + fVelIncrement;
+    else{
+        fNewVelR = velMean + fVelIncrement;
+        fNewVelL = velMean - fVelIncrement;
+    }
 
     float vr = *velR;
     float vl = *velL;
@@ -155,7 +172,7 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
         fNewVelR = pid_data->velMin;
     else if(fNewVelR > pid_data->velMax)
         fNewVelR = pid_data->velMax;
-
+    
     if(fNewVelL < pid_data->velMin)
         fNewVelL = pid_data->velMin;
     else if(fNewVelL > pid_data->velMax)

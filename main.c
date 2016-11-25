@@ -16,14 +16,14 @@
 #include "fsl_debug_console.h"
 
 /* defines */
-#define CYCLIC_EXECUTIVE_PERIOD         100*1000 /* 10000 100 micro seconds */
+#define CYCLIC_EXECUTIVE_PERIOD         500*1000 /* micro seconds */
 
 volatile unsigned int uiFlagNextPeriod = 0;         /* cyclic executive flag */
 
 int iEncR = 0;
 int iEncL = 0;
 int flagEnc = 0;
-float iCycleTime = 0.5; //(CYCLIC_EXECUTIVE_PERIOD/1000000);
+float iCycleTime = 0.075; //(CYCLIC_EXECUTIVE_PERIOD/1000000);
 
 void main_boardInit(void){
     ////Clock
@@ -55,13 +55,13 @@ void main_cyclicExecuteIsr(void){
     /* set the cyclic executive flag */
     uiFlagNextPeriod = 1;
     
-    if(flagEnc == 5){
+    //if(flagEnc == 0){
         iEncR = encoder_getTPMCNT(0);
         iEncL = encoder_getTPMCNT(1);
-        flagEnc = 0;
-    }
-    else
-        flagEnc++;
+        //flagEnc = 0;
+    //}
+    //else
+    //    flagEnc++;
 }
 
 int main(void){
@@ -80,8 +80,8 @@ int main(void){
     int iPwmRefL[2] = {0, 97};
     float fVelRefR[2] = {0.0, 0.0}; //vel[0] = min vel e vel[1] = max vel
     float fVelRefL[2] = {0.0, 0.0};
-    int iPwmR = 0;
-    int iPwmL = 0;
+    int iPwmR = 60;
+    int iPwmL = 60;
     
     int stt = 0;
     int iTimer = 0;
@@ -100,6 +100,8 @@ int main(void){
     
     selfTest_motorCalibration(fVelRefR, fVelRefL, iPwmRefR, iPwmRefL);
     
+    
+    
     if(fVelRefL[0] > fVelRefR[0])
         velRange[0] = fVelRefL[0];
     else
@@ -117,22 +119,23 @@ int main(void){
     pidR.kp = 0.0634;   //0.2180;   //0.3645;       //0.2180;     //0.2645;
     pidR.ki = 0.1589;   //0.2595;   //0.5455;       //0.2560;     //0.521;
     pidR.kd = 0.0002;   //0.0041;   //0.0045;       //0.0041;     //0.0045;
-    
+              
     pidL.kp = 0.0644;   //0.2205;   //0.2545;
     pidL.ki = 0.1599;   //0.2605;   //0.3105;
     pidL.kd = 0.0002;   //0.0045;   //0.0045;
     
-    pidS.kp = 1;
-    pidS.ki = 1.5;
-    pidS.kd = 0.2;
+    pidS.kp = 10;
+    pidS.ki = 25;
+    pidS.kd = 2;
     
-    pidR.ref = 1.4;
-    pidL.ref = 1.4;
-    pidS.ref = 37.5;
-    fRefR = 1.0;
-    fRefL = 1.0;
+    pidR.ref = 0.5;
+    pidL.ref = 0.5;
+    fRefR = 0.5;
+    fRefL = 0.5;
     
     led_blinkAllLeds(200, 5);
+    
+    tc_installLptmr0(75000, main_cyclicExecuteIsr);
 
     while(1U){
 
@@ -149,7 +152,7 @@ int main(void){
         motor_set('L', 1, iPwmL);
 
         position = ir_sensor_returnLow(ir_Base);
-        pid_splineUpdate(&pidS, position, &fRefR, &fRefL, 1.4);
+        pid_splineUpdate(&pidS, position, &fRefR, &fRefL, 0.5);
         
         pidR.ref = fRefR;
         pidL.ref = fRefL;
