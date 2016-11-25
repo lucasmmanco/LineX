@@ -112,12 +112,12 @@ void pid_splineInitializate(PID_SPLINE *pid_data, float vel[]){
 /*                     *velL = left motor speed     */
 /* Output params:      double                       */
 /* ************************************************ */
-void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float *velL, float velMean){
+void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, int *velR, int *velL, int velMean){
     float fP_term, fI_term, fD_term;
     float error, dif;
     float fNewSpline = 0.0;
-    float fVelIncrement= 0.0;
-    float fNewVelR, fNewVelL;
+    int fVelIncrement= 0;
+    int fNewVelR, fNewVelL;
     float window = 5;
     
     splineVal = splineVal - 37.5;
@@ -147,10 +147,14 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
     //    fNewSpline = -37.5;
     //    
     
+    
     if(fNewSpline < 0)
-        fVelIncrement = -(fNewSpline)/40.0;
+        fVelIncrement = (int)(-(fNewSpline)/10.0);
     else
-        fVelIncrement = fNewSpline/40.0;
+        fVelIncrement = (int)(fNewSpline/10.0);
+    
+    if(fVelIncrement > 10)
+        fVelIncrement = 10;
     
     //if(fVelIncrement > (velMean - pid_data->velMin) || fVelIncrement > (pid_data->velMax - velMean)){
     //    fVelIncrement = (velMean - pid_data->velMin);
@@ -165,18 +169,18 @@ void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float 
         fNewVelL = velMean - fVelIncrement;
     }
 
-    float vr = *velR;
-    float vl = *velL;
+    int vr = *velR;
+    int vl = *velL;
      
-    if(fNewVelR < pid_data->velMin)
-        fNewVelR = pid_data->velMin;
-    else if(fNewVelR > pid_data->velMax)
-        fNewVelR = pid_data->velMax;
-    
-    if(fNewVelL < pid_data->velMin)
-        fNewVelL = pid_data->velMin;
-    else if(fNewVelL > pid_data->velMax)
-        fNewVelL = pid_data->velMax;
+    //if(fNewVelR < pid_data->velMin)
+    //    fNewVelR = pid_data->velMin;
+    //else if(fNewVelR > pid_data->velMax)
+    //    fNewVelR = pid_data->velMax;
+    //
+    //if(fNewVelL < pid_data->velMin)
+    //    fNewVelL = pid_data->velMin;
+    //else if(fNewVelL > pid_data->velMax)
+    //    fNewVelL = pid_data->velMax;
 
 
     *velR = fNewVelR;

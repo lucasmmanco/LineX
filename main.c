@@ -73,19 +73,19 @@ int main(void){
     int position = 0;
     
     float fRpsR, fRpsL, fRefL, fRefR;
-    PID_MOTOR pidR, pidL;
+    //PID_MOTOR pidR, pidL;
     PID_SPLINE pidS;
     
-    int iPwmRefR[2] = {0, 97}; //pwm[0] = min pwm e pwm[1] = max pwm
-    int iPwmRefL[2] = {0, 97};
+    //int iPwmRefR[2] = {0, 97}; //pwm[0] = min pwm e pwm[1] = max pwm
+    //int iPwmRefL[2] = {0, 97};
     float fVelRefR[2] = {0.0, 0.0}; //vel[0] = min vel e vel[1] = max vel
     float fVelRefL[2] = {0.0, 0.0};
-    int iPwmR = 60;
-    int iPwmL = 60;
+    int iPwmR = 65;
+    int iPwmL = 65;
     
-    int stt = 0;
+    //int stt = 0;
     int iTimer = 0;
-    int ir_Base[12];
+    int ir_Base[12], ir_normalized[6];
     float velRange[2] = {0.5, 2.0};
     
     int error = selfTest_IR();
@@ -98,9 +98,7 @@ int main(void){
     ir_setIRTX();
     ir_sensor_runCalibration(&ir_Base);
     
-    selfTest_motorCalibration(fVelRefR, fVelRefL, iPwmRefR, iPwmRefL);
-    
-    
+    //selfTest_motorCalibration(fVelRefR, fVelRefL, iPwmRefR, iPwmRefL);
     
     if(fVelRefL[0] > fVelRefR[0])
         velRange[0] = fVelRefL[0];
@@ -112,30 +110,31 @@ int main(void){
     else
         velRange[1] = fVelRefL[1];
     
-    pid_motorInitializate(&pidR, fVelRefR, iPwmRefR);
-    pid_motorInitializate(&pidL, fVelRefL, iPwmRefL);
+    //pid_motorInitializate(&pidR, fVelRefR, iPwmRefR);
+    //pid_motorInitializate(&pidL, fVelRefL, iPwmRefL);
     pid_splineInitializate(&pidS, velRange);
     
-    pidR.kp = 0.0634;   //0.2180;   //0.3645;       //0.2180;     //0.2645;
-    pidR.ki = 0.1589;   //0.2595;   //0.5455;       //0.2560;     //0.521;
-    pidR.kd = 0.0002;   //0.0041;   //0.0045;       //0.0041;     //0.0045;
+    //pidR.kp = 0.0634;   //0.2180;   //0.3645;       //0.2180;     //0.2645;
+    //pidR.ki = 0.1589;   //0.2595;   //0.5455;       //0.2560;     //0.521;
+    //pidR.kd = 0.0002;   //0.0041;   //0.0045;       //0.0041;     //0.0045;
               
-    pidL.kp = 0.0644;   //0.2205;   //0.2545;
-    pidL.ki = 0.1599;   //0.2605;   //0.3105;
-    pidL.kd = 0.0002;   //0.0045;   //0.0045;
+    //pidL.kp = 0.0644;   //0.2205;   //0.2545;
+    //pidL.ki = 0.1599;   //0.2605;   //0.3105;
+    //pidL.kd = 0.0002;   //0.0045;   //0.0045;
     
-    pidS.kp = 10;
-    pidS.ki = 25;
-    pidS.kd = 2;
+    pidS.kp = 6.5;
+    pidS.ki = 0.0;
+    pidS.kd = 0.0;
     
-    pidR.ref = 0.5;
-    pidL.ref = 0.5;
+    //pidR.ref = 0.5;
+    //pidL.ref = 0.5;
     fRefR = 0.5;
     fRefL = 0.5;
+    pidS.ref = 15;
     
     led_blinkAllLeds(200, 5);
     
-    tc_installLptmr0(75000, main_cyclicExecuteIsr);
+    tc_installLptmr0(10000, main_cyclicExecuteIsr);
 
     while(1U){
 
@@ -145,17 +144,17 @@ int main(void){
         fRpsR = ((float)(iEncR)/(20.0*iCycleTime));
         fRpsL = ((float)(iEncL)/(20.0*iCycleTime));
         
-        iPwmR = pid_motorUpdate(&pidR, fRpsR);
-        iPwmL = pid_motorUpdate(&pidL, fRpsL);
+        //iPwmR = pid_motorUpdate(&pidR, fRpsR);
+        //iPwmL = pid_motorUpdate(&pidL, fRpsL);
         
         motor_set('R', 1, iPwmR);
         motor_set('L', 1, iPwmL);
 
-        position = ir_sensor_returnLow(ir_Base);
-        pid_splineUpdate(&pidS, position, &fRefR, &fRefL, 0.5);
+        position = ir_sensor_returnLow(ir_Base, ir_normalized);
+        pid_splineUpdate(&pidS, position, &iPwmR, &iPwmL, 60);
         
-        pidR.ref = fRefR;
-        pidL.ref = fRefL;
+        //pidR.ref = fRefR;
+        //pidL.ref = fRefL;
         
         //Somente para testes
         //position = ir_sensor_returnPosiTest(ir_rx_val);

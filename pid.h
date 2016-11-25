@@ -43,7 +43,7 @@ int pid_motorUpdate(PID_MOTOR *pid_data, float sensorVal);
 
 void pid_splineInitializate(PID_SPLINE *pid_data, float vel[]);
 
-void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, float *velR, float *velL, float velMean);
+void pid_splineUpdate(PID_SPLINE *pid_data, float splineVal, int *velR, int *velL, int velMean);
 
 
 #endif /* SOURCES_PID_H_ */

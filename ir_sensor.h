@@ -117,6 +117,6 @@ int ir_sensor_intensityCheck(int* in_Array, int* out_Deduc);
 /* Function: ir_sensor_returnLow   	                */
 /* Returns normalized location between 0 - 100 %	*/
 /****************************************************/
-int ir_sensor_returnLow(int *IR_Reference);
+int ir_sensor_returnLow(int *IR_Reference, int *IR_normalized);
 
 int ir_sensor_returnPosiTest(int ir_valNormal[]);

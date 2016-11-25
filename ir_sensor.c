@@ -289,15 +289,15 @@ int ir_sensor_intensityCheck(int* in_Array, int* out_Deduc){
 }
 
 /* Returns normalized location between 0 - 100 %	*/
-int ir_sensor_returnLow(int *IR_Reference){
+int ir_sensor_returnLow(int *IR_Reference, int *IR_normalized){
 	
-	int Vector[6], Gaussian[4], Position;
+	int Gaussian[4], Position;
     
     float Equation[4];
 
-	ir_sensor_readNormal(IR_Reference, &Vector);
+	ir_sensor_readNormal(IR_Reference, IR_normalized);
 
-	Position = ir_sensor_intensityCheck(Vector, Gaussian);
+	Position = ir_sensor_intensityCheck(IR_normalized, Gaussian);
 
 	ir_sensor_doAbarrelRom(Gaussian, Equation);
 
@@ -330,7 +330,12 @@ int ir_sensor_returnLow(int *IR_Reference){
     }
     
 	Result1 = (15*Position + 15*Result1);//*100/75;
-	
+    
+    if(Result1 > 75)
+        Result1 = 75;
+    else if(Result1 < 0)
+        Result1 = 0;
+    	
 	return Result1;
 
 }
